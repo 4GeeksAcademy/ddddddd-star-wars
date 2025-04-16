@@ -3,9 +3,7 @@ from sqlalchemy import String, Boolean, Integer, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship, declarative_base
 from eralchemy2 import render_er
 
-
 Base = declarative_base()
-
 db = SQLAlchemy()
 
 class User(Base):  
@@ -15,9 +13,10 @@ class User(Base):
     password: Mapped[str] = mapped_column(nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False)
 
-    posts = relationship("Post", backref="user")
-    comments = relationship("Comment", backref="user")
-    likes = relationship("Like", backref="user")
+    people = relationship("People", backref="user")
+    planets = relationship("Planet", backref="user")
+    favorites = relationship("Favorite", backref="user")
+    vehicles = relationship("Vehicle", backref="user")
 
     def serialize(self):
         return {
@@ -25,29 +24,34 @@ class User(Base):
             "email": self.email,
         }
 
-class Post(Base):  
-    __tablename__ = 'post'  
+class People(Base):  
+    __tablename__ = 'people'  
     id: Mapped[int] = mapped_column(primary_key=True)
     image_url: Mapped[str] = mapped_column(String(255), nullable=False)
     caption: Mapped[str] = mapped_column(String(500), nullable=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-  
-    comments = relationship("Comment", backref="post")
-    likes = relationship("Like", backref="post")
 
-class Comment(Base):  
-    __tablename__ = 'comment'   
+class Planet(Base):  
+    __tablename__ = 'planet'   
     id: Mapped[int] = mapped_column(primary_key=True)
     content: Mapped[str] = mapped_column(String(500), nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    post_id: Mapped[int] = mapped_column(ForeignKey("post.id"))
 
-class Like(Base): 
-    __tablename__ = 'like'  
+class Vehicle(Base):  
+    __tablename__ = 'vehicle'   
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    model: Mapped[str] = mapped_column(String(120), nullable=True)
+    manufacturer: Mapped[str] = mapped_column(String(120), nullable=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+
+class Favorite(Base): 
+    __tablename__ = 'favorites'  
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    post_id: Mapped[int] = mapped_column(ForeignKey("post.id"))
-
+    planet_id: Mapped[int] = mapped_column(ForeignKey("planet.id"), nullable=True)
+    people_id: Mapped[int] = mapped_column(ForeignKey("people.id"), nullable=True)
+    vehicle_id: Mapped[int] = mapped_column(ForeignKey("vehicle.id"), nullable=True)
 
 try:
     result = render_er(Base, 'diagram.png')
